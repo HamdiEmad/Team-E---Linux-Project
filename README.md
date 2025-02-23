@@ -1,4 +1,6 @@
-# Team-E---Linux-Project
+# Team-E-Linux-Project
+# Bash Scripting
+
 Bash scripting (System Health Check Up &amp;&amp; Automated Backup and Recovery Tool)
 
 
