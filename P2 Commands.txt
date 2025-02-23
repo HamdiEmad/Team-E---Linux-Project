@@ -1,0 +1,36 @@
+- Summary of Commands Used in the Backup Script
+
+1. Defining Variables for Backup Storage:
+RETENTION_DAYS: Number of days to keep backups before automatic deletion.
+BACKUP_DIR: Variable to store the destination folder for backups.
+BACKUP_TARGETS: Array to store the directories that will be backed up.
+
+2. Prompting User for Backup Destination:
+read -p : prompts the user to enter the backup destination.
+mkdir -p : ensures the directory exists or creates it if necessary.
+
+3. Prompting User for Directories to Backup:
+read -a : allows the user to input multiple directories, storing them in an array.
+
+4. Creating the Backup Using tar:
+tar -czf "$ARCHIVE_PATH" "${BACKUP_TARGETS[@]}"
+Generates a timestamped backup filename to prevent overwriting.
+Uses tar -czf to compress the selected directories into a .tar.gz file.
+
+5. Deleting Old Backups (Retention Management):
+find "$BACKUP_DIR" -type f -name "backup_*.tar.gz" -mtime +$RETENTION_DAYS -exec rm {} \;
+find searches for backups older than 7 days (-mtime +$RETENTION_DAYS) and deletes them (-exec rm {}).
+
+6. Synchronizing with Google Drive using rclone:
+read GDRIVE_CHOICE
+if [[ "$GDRIVE_CHOICE" == "y" ]]; then
+    rclone copy "$ARCHIVE_PATH" gdrive:/Backups/
+fi
+-Asks the user if they want to upload the backup to Google Drive.
+-Uses rclone to sync the backup (requires pre-configured rclone setup).
+
+7. Listing Available Backups:
+ls -lh "$BACKUP_DIR" : displays the available backup files inside the destination folder.
+
+8. Displaying a Completion Message:
+echo "Backup process complete!" : informs the user that the backup process is finished.

@@ -1,0 +1,111 @@
+(1). CPU
+=========
+lscpu : The lscpu command provides detailed information about the CPU architecture and characteristics. 
+cat /proc/cpuinfo : file contains information about the CPU and its features.
+top & htop : The top and htop commands are system monitoring tools that provide real-time information about processes and system resources.
+nproc : The nproc command displays the number of processing units available. 
+
+
+
+(2). Memory
+============
+free : Total amount of free and used physical memory.
+       Total amount of swap memory in the system.
+       Buffers and caches used by the kernel.
+       
+free -m : for information and usage in MB.
+free -g : for information and usage in GB.
+free -t : This will simply total the amount of memory in columns.
+
+vmstat : reports virtual memory statistics.
+
+egrep --color 'Mem|Cache|Swap' /proc/meminfo : This will produce an easy to read listing of all entries that contain Mem, Cache, and Swap … with a splash of color.
+
+
+(3). Disk
+==========
+df : shows available and used disk space on the Linux system.
+df -h : shows disk space in human-readable format.
+df -a : shows the file system's complete disk usage even if the Available field is 0.
+df -T : shows the disk usage along with each block's filesystem type (e.g., xfs, ext2, ext3, btrfs, etc.).
+du : shows the disk usage of files, folders, etc. in the default kilobyte size.
+du -h :  shows disk usage in human-readable format for all directories and subdirectories.
+du -a : shows disk usage for all files.
+du -s : provides total disk space used by a particular file or directory.
+sudo fdisk -l : shows disk size along with disk partitioning information.
+
+
+(4). Network status
+===================
+ip a : Displays all network interfaces and IP addresses.
+ifconfig : configure a network interface (-a, -s, -v).
+ip r : Show the current routing table.
+sudo ufw status : check firewall status. 
+
+
+
+(5). Pending software updates
+==============================
+apt list --upgradable
+
+
+
+
+Used Commands in the script :-
+===============================
+
+
+(0). in general :-
+DIR="/home/hamdi-emad/Desktop/System_Reports" : Save the parent directory path in a variable.
+REP="$DIR/System_Report_$(date +%d":"%m":"%Y___%H":"%M":"%S).txt" : Save the report file name and initialization date with the (day:month:year___hour:minute:second).
+if [[ -d $DIR ]] : this condition checks whether the directory exist or not.
+rm -rf $DIR/* : Delete the total contents of the directory.
+mkdir -p "$DIR" : make a new directory with -p to indicate it as a parent directory.
+touch $REP : to make a new report file in the directory.
+printf and echo : to print the text in the file.
+
+
+
+(1). The CPU :-
+top -bn1 | grep "Cpu(s)" | awk '{print "CPU Load: " $2+$4 "%"}' >> "$REP" :
+top -bn1 : to run the command in batch mode and only once, which can display the information without the interface.
+grep "Cpu(s)" : to search in the output for this word and display it without the other results.
+awk '{print "CPU Load: " $2+$4 "%"}' : used to add the (us) and (sy) resulted from the previous command ($2 refers to "us" and $4 to "sy").Together, it represent the total CPU load.
+
+
+
+(2). Memory :-
+free -h :- gives the memory information in GB in human readable format.
+egrep --color 'Mem|Cache|Swap' /proc/meminfo >> "$REP" :- egrep is similar to grep, but it supports an a method to search a pattern in regular expressions.
+--color: Highlights the matched patterns in the output which are the words "Mem", "Cache" and "Swap".
+/proc/meminfo: A saved file in Linux that contains detailed information about the system's memory usage. 
+
+
+
+(3). Disk :-
+df -h : shows disk space in human-readable format.
+
+
+
+(4). Network :-
+ip -brief address :- as it is clear and obvious, this command is used to get the network interfaces and the IP address.
+
+
+
+(5). Pending software updates :-
+UPD=$(apt list --upgradable 2>/dev/null | grep -v Listing) :-
+apt list --upgradable : viewing the pending updates of the newer version packages in the system.
+2>/dev/null : to dismiss the error messages.
+grep -v Listing :- to search in the output of the word Listing.
+UPD=$() : to put the output of the command in a variable named UPD.
+
+and finally, to be able to send the report via user email:-
+msmtp usermail@example.com < file.txt : to send the text file to the user email
+
+for make this script automated, we entered crontab -e command and put this line :-
+*/1 * * * * /home/hamdi-emad/Desktop/P1.sh : this line makes the script executed automatically every minute.
+
+crontab  refers to cron table which is a time-based scheduler to automate the scripts.
+* * * * * : represents the minute, hour, day of the month, month and day of the week.
+if you want to automate the script to run every day in 5 AM, just make the first * to be 0 and the second one to be 5.
+if you want to make it every period of time, make it like this */number.
